@@ -12,6 +12,10 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     
     var businesses: [Business]!
     
+    var filteredBusinesses: [Business]!
+    
+    var searchController: UISearchController!
+    
     @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
@@ -20,15 +24,47 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         // set up delegate and datasource for tableView
         tableView.delegate = self
         tableView.dataSource = self
+        
+        // set filteredBusinesses equal to businesses
+        filteredBusinesses = businesses
+        
         // give the tableView an estimate before it figures out the actual height
         tableView.estimatedRowHeight = 150
         // tell rowHeight to use AutoLayout Parameters
         tableView.rowHeight = UITableViewAutomaticDimension
         
+        // Search Bar in Navigation View Code
+        //-----------------------------------
+        // create the search bar programatically since you can't
+        // drag it onto the navigation bar
+        
+        // initializing searchController
+        // searchResultsController set to nil, so it will use this VC to display results
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        
+        // since we're using the same VC to present the results, it doesn't make sense
+        // to dim it out.
+        searchController.dimsBackgroundDuringPresentation = false
+        
+        // set searchBar size to Fit
+        searchController.searchBar.sizeToFit()
+        
+        // set code so that searchController doesn't disappear
+        searchController.hidesNavigationBarDuringPresentation = false
+        
+        // the UIViewController comes with a navigationItem property
+        // this will automatically be initialized for you if/when the
+        // view controller is added to a navigation controller's stack
+        // you just need to set the titleView to be the search bar
+        
+        navigationItem.titleView = searchController.searchBar
+        //-----------------------------------
         
         Business.searchWithTerm(term: "Thai", completion: { (businesses: [Business]?, error: Error?) -> Void in
             
             self.businesses = businesses
+            self.filteredBusinesses = businesses
             // update tableView
             self.tableView.reloadData()
             
@@ -63,8 +99,8 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     // set number of rows in a particular section
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if businesses != nil {
-            return businesses.count
+        if filteredBusinesses != nil {
+            return filteredBusinesses.count
         }
         
         return 0
@@ -75,7 +111,7 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "Business Cell", for: indexPath) as! BusinessCell
         
-        cell.business = businesses[indexPath.row]
+        cell.business = filteredBusinesses[indexPath.row]
         
         return cell
     }
@@ -90,4 +126,19 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
      }
      */
     
+}
+
+extension BusinessesViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        if let searchText = searchController.searchBar.text {
+            filteredBusinesses = searchText.isEmpty ? businesses : businesses.filter({(data: Business) -> Bool in
+                return data.name?.range(of: searchText, options: .caseInsensitive) != nil
+            })
+            
+            // reload the data in the table view
+            tableView.reloadData()
+        }
+    }
+
 }
