@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit // for
 
 class Business: NSObject {
     let name: String?

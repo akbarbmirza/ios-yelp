@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import MapKit // for Maps
+import CoreLocation // to get User's location
 
 class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
@@ -14,6 +16,7 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     // Outlets
     // =========================================================================
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var mapView: MKMapView!
     
     // =========================================================================
     // Properties
@@ -28,6 +31,8 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     var loadingMoreView: InfiniteScrollActivityView?
     
     var offset = 0
+    
+    var locationManager: CLLocationManager!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,18 +95,19 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
             self.filteredBusinesses = businesses
             
             self.offset += 20
-            // update tableView
-            self.tableView.reloadData()
             
             if let businesses = businesses {
                 for business in businesses {
                     print(business.name!)
                     print(business.address!)
+                    
+                    self.addAnnotationAt(address: business.address!, title: business.name!)
                 }
             }
             
-            }
-        )
+            // update tableView
+            self.tableView.reloadData()
+        })
         
         /* Example of Yelp search with more search options specified
          Business.searchWithTerm("Restaurants", sort: .Distance, categories: ["asianfusion", "burgers"], deals: true) { (businesses: [Business]!, error: NSError!) -> Void in
@@ -113,6 +119,8 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
          }
          }
          */
+        
+        setupMaps()
         
     }
     
@@ -223,5 +231,72 @@ extension BusinessesViewController: UIScrollViewDelegate {
             
         }
     }
+    
+}
+
+extension BusinessesViewController: CLLocationManagerDelegate {
+    
+    func setupMaps() {
+        // set the region to display, this also sets a correct zoom level
+        // set starting center location in San Francisco
+        let centerLocation = CLLocation(latitude: 37.785771, longitude: -122.406165)
+        goToLocation(centerLocation)
+        
+        // get User's location
+        // ---------------------------------------------------------------------
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.distanceFilter = 200
+        locationManager.requestWhenInUseAuthorization() // request location access
+        // ---------------------------------------------------------------------
+    }
+    
+    func goToLocation(_ location: CLLocation) {
+        let span = MKCoordinateSpanMake(0.1, 0.1)
+        let region = MKCoordinateRegionMake(location.coordinate, span)
+        mapView.setRegion(region, animated: true)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == CLAuthorizationStatus.authorizedWhenInUse {
+            locationManager.startUpdatingLocation()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            let span = MKCoordinateSpanMake(0.1, 0.1)
+            let region = MKCoordinateRegionMake(location.coordinate, span)
+            mapView.setRegion(region, animated: true)
+        }
+    }
+    
+    // Helper Functions for Creating Annotations
+    // -------------------------------------------------------------------------
+    // add an Annotation with a coordinate: CLLocationCoordinate2D
+    func addAnnotationAt(coordinate: CLLocationCoordinate2D) {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        annotation.title = "An annotation!"
+        mapView.addAnnotation(annotation)
+    }
+    
+    // add an Annotation with an address: String
+    func addAnnotationAt(address: String, title: String) {
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(address) { (placemarks, error) in
+            if let placemarks = placemarks {
+                if placemarks.count != 0 {
+                    let coordinate = placemarks.first!.location!
+                    let annotation = MKPointAnnotation()
+                    annotation.coordinate = coordinate.coordinate
+                    annotation.title = title
+                    self.mapView.addAnnotation(annotation)
+                }
+            }
+        }
+    }
+    // -------------------------------------------------------------------------
     
 }
