@@ -32,11 +32,18 @@ class BusinessCell: UITableViewCell {
     var business: Business! {
         didSet {
             nameLabel.text = business.name
-            thumbImageView.setImageWith(business.imageURL!)
+            if let imageURL = business.imageURL {
+                thumbImageView.setImageWith(imageURL)
+            }
             categoriesLabel.text = business.categories
             addressLabel.text = business.address
-            reviewsCountLabel.text = "\(business.reviewCount!) Reviews"
-            ratingImageView.setImageWith(business.ratingImageURL!)
+            if let reviewCount = business.reviewCount {
+                reviewsCountLabel.text = "\(reviewCount) Reviews"
+            }
+            
+            if let ratingImageURL = business.ratingImageURL {
+                ratingImageView.setImageWith(ratingImageURL)
+            }
             distanceLabel.text = business.distance
         }
     }

@@ -10,13 +10,23 @@ import UIKit
 
 class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
+    // =========================================================================
+    // Outlets
+    // =========================================================================
+    @IBOutlet weak var tableView: UITableView!
+    
+    // =========================================================================
+    // Properties
+    // =========================================================================
     var businesses: [Business]!
     
     var filteredBusinesses: [Business]!
     
     var searchController: UISearchController!
     
-    @IBOutlet weak var tableView: UITableView!
+    var isMoreDataLoading = false
+    
+    var offset = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,10 +71,12 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         navigationItem.titleView = searchController.searchBar
         //-----------------------------------
         
-        Business.searchWithTerm(term: "Thai", completion: { (businesses: [Business]?, error: Error?) -> Void in
+        Business.searchWithTerm(term: "Thai", offset: offset, completion: { (businesses: [Business]?, error: Error?) -> Void in
             
             self.businesses = businesses
             self.filteredBusinesses = businesses
+            
+            self.offset += 20
             // update tableView
             self.tableView.reloadData()
             
@@ -141,4 +153,53 @@ extension BusinessesViewController: UISearchResultsUpdating {
         }
     }
 
+}
+
+extension BusinessesViewController: UIScrollViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // handle scroll behavior here
+        
+        // if more data isn't already loading
+        if (!isMoreDataLoading) {
+            // calculate the position of one screen length before the bottom of the results
+            let scrollViewContentHeight = tableView.contentSize.height
+            let scrollOffsetThreshold = scrollViewContentHeight - tableView.bounds.size.height
+            
+            // when the user has scrolled past the threshold, start requesting
+            if (scrollView.contentOffset.y > scrollOffsetThreshold && tableView.isDragging) {
+                
+                isMoreDataLoading = true
+                
+                // code to load more results
+                Business.searchWithTerm(term: "Thai", offset: offset, completion:  {
+                    (businesses: [Business]?, error: Error?) -> Void in
+                    
+                    // initialize the filtered data
+                    if let businesses = businesses {
+                        self.businesses.append(contentsOf: businesses)
+                        self.filteredBusinesses = self.businesses
+                    }
+                    
+                    
+                    self.offset += 20
+                    // update tableView
+                    self.tableView.reloadData()
+                    
+                    if let businesses = businesses {
+                        for business in businesses {
+                            print(business.name!)
+                            print(business.address!)
+                        }
+                    }
+                    
+                    // update flag
+                    self.isMoreDataLoading = false
+                    
+                })
+            }
+            
+        }
+    }
+    
 }
