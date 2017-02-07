@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="x8S-S4-LkA">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="GNr-B4-j5i">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -136,6 +136,38 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fgb-4b-F1b" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2727.1999999999998" y="357.57121439280365"/>
+        </scene>
+        <!--Map View Controller-->
+        <scene sceneID="xYy-6J-5ON">
+            <objects>
+                <viewController id="GNr-B4-j5i" customClass="MapViewController" customModule="Yelp" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="EJB-6d-R1g"/>
+                        <viewControllerLayoutGuide type="bottom" id="KGP-gx-7rI"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="XRX-tS-yKq">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u1T-ia-tRH">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </mapView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="KGP-gx-7rI" firstAttribute="top" secondItem="u1T-ia-tRH" secondAttribute="bottom" id="6IW-5C-pfG"/>
+                            <constraint firstAttribute="trailing" secondItem="u1T-ia-tRH" secondAttribute="trailing" id="WUi-SR-ZvB"/>
+                            <constraint firstItem="u1T-ia-tRH" firstAttribute="top" secondItem="XRX-tS-yKq" secondAttribute="top" id="t7y-A0-ijm"/>
+                            <constraint firstItem="u1T-ia-tRH" firstAttribute="leading" secondItem="XRX-tS-yKq" secondAttribute="leading" id="xaa-p5-UqH"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="mapView" destination="u1T-ia-tRH" id="LDO-mH-8Y9"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jNK-jz-A6U" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3565.5999999999999" y="357.57121439280365"/>
         </scene>
         <!--Yelp-->
         <scene sceneID="9Vd-Zn-40t">
