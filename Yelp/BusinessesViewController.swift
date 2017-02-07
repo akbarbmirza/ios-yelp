@@ -25,11 +25,24 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     var searchController: UISearchController!
     
     var isMoreDataLoading = false
+    var loadingMoreView: InfiniteScrollActivityView?
     
     var offset = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Set up Infinite Scroll Loading Indicator
+        // ---------------------------------------------------------------------
+        let frame = CGRect(x: 0, y: tableView.contentSize.height, width: tableView.bounds.size.width, height: InfiniteScrollActivityView.defaultHeight)
+        loadingMoreView = InfiniteScrollActivityView(frame: frame)
+        loadingMoreView!.isHidden = true
+        tableView.addSubview(loadingMoreView!)
+        
+        var insets = tableView.contentInset
+        insets.bottom += InfiniteScrollActivityView.defaultHeight
+        tableView.contentInset = insets
+        // ---------------------------------------------------------------------
         
         // set up delegate and datasource for tableView
         tableView.delegate = self
@@ -171,6 +184,11 @@ extension BusinessesViewController: UIScrollViewDelegate {
                 
                 isMoreDataLoading = true
                 
+                // update position of loadingMoreView, and start loading indicator
+                let frame = CGRect(x: 0, y: tableView.contentSize.height, width: tableView.bounds.size.width, height: InfiniteScrollActivityView.defaultHeight)
+                loadingMoreView?.frame = frame
+                loadingMoreView!.startAnimating()
+                
                 // code to load more results
                 Business.searchWithTerm(term: "Thai", offset: offset, completion:  {
                     (businesses: [Business]?, error: Error?) -> Void in
@@ -181,8 +199,15 @@ extension BusinessesViewController: UIScrollViewDelegate {
                         self.filteredBusinesses = self.businesses
                     }
                     
-                    
+                    // update offset
                     self.offset += 20
+                    
+                    // update flag
+                    self.isMoreDataLoading = false
+                    
+                    // stop the loading indicator
+                    self.loadingMoreView!.stopAnimating()
+                    
                     // update tableView
                     self.tableView.reloadData()
                     
@@ -192,9 +217,6 @@ extension BusinessesViewController: UIScrollViewDelegate {
                             print(business.address!)
                         }
                     }
-                    
-                    // update flag
-                    self.isMoreDataLoading = false
                     
                 })
             }
